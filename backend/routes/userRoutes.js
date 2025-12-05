@@ -9,10 +9,10 @@ import {
   getUserById,
   verifyAdmin,
   uploadRequirements,
-  getMe
+  getMe,
+  deleteUser
 } from "../controllers/userController.js";
 import { authMiddlewareUser } from "../middleware/authMiddlewareUser.js";
-
 
 const router = express.Router();
 
@@ -44,6 +44,9 @@ router.post(
   ]),
   registerUser
 );
+
+// Delete user by ID ✅
+router.delete("/:id", deleteUser);
 
 // Upload requirements only (Valid ID + Resume)
 router.post(

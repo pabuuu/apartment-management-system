@@ -43,6 +43,7 @@ function StaffAccounts() {
       s.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Sorting
   const handleSort = (type) => {
     const sorted = [...staffs];
     if (type === "az") {
@@ -52,6 +53,28 @@ function StaffAccounts() {
       sorted.sort((a, b) => (b.fullName || "").localeCompare(a.fullName || ""));
     }
     setStaffs(sorted);
+  };
+
+  // ============================
+  // DELETE STAFF ACCOUNT
+  // ============================
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this staff?");
+    if (!confirmed) return;
+
+    try {
+      const res = await axios.delete(`${BASE_URL}/users/${id}`);
+
+      if (res.data.success) {
+        setNotification({ type: "success", message: "Staff deleted successfully" });
+        fetchStaffs(); // Refresh list
+      } else {
+        setNotification({ type: "error", message: res.data.message });
+      }
+    } catch (err) {
+      console.error("Error deleting staff:", err);
+      setNotification({ type: "error", message: "Failed to delete staff." });
+    }
   };
 
   if (loading)
@@ -118,6 +141,7 @@ function StaffAccounts() {
               <th>Email</th>
               <th>Contact Number</th>
               <th>Verified</th>
+              <th>Actions</th> {/* ADDED */}
             </tr>
           </thead>
           <tbody>
@@ -132,6 +156,17 @@ function StaffAccounts() {
                 <td>{staff.email || "N/A"}</td>
                 <td>{staff.contactNumber || "N/A"}</td>
                 <td>{staff.isVerified ? "Yes" : "No"}</td>
+
+                {/* ACTION BUTTONS */}
+                <td onClick={(e) => e.stopPropagation()}>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(staff._id)}
+                  >
+                    Delete
+                  </button>
+                </td>
+
               </tr>
             ))}
           </tbody>

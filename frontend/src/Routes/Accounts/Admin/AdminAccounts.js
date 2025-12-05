@@ -16,13 +16,16 @@ function AdminAccounts() {
   const [notification, setNotification] = useState({ type: "", message: "" });
   const [searchTerm, setSearchTerm] = useState("");
 
+  const currentAdminId = sessionStorage.getItem("adminId");
+
   const fetchAdmins = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${BASE_URL}/users`);
       const data = res.data || [];
-      // Only keep users with role 'admin' and a fullName defined
-      const filteredAdmins = data.filter((u) => u.role === "admin" && u.fullName);
+      const filteredAdmins = data.filter(
+        (u) => u.role === "admin" && u.fullName
+      );
       setAdmins(filteredAdmins);
     } catch (err) {
       console.error("Error fetching admins:", err);
@@ -36,14 +39,53 @@ function AdminAccounts() {
     fetchAdmins();
   }, []);
 
-  // Safe filtering by fullName
+  // DELETE ADMIN FUNCTION
+  const handleDelete = async (id) => {
+    if (id === currentAdminId) {
+      setNotification({
+        type: "error",
+        message: "You cannot delete your own account.",
+      });
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this admin?"
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await axios.delete(`${BASE_URL}/users/${id}`);
+
+      if (res.data.success) {
+        setNotification({
+          type: "success",
+          message: "Admin deleted successfully.",
+        });
+        fetchAdmins(); // Refresh
+      } else {
+        setNotification({
+          type: "error",
+          message: res.data.message || "Failed to delete admin.",
+        });
+      }
+    } catch (error) {
+      console.error("Delete admin error:", error);
+      setNotification({
+        type: "error",
+        message: "Server error while deleting admin.",
+      });
+    }
+  };
+
+  // Filtering
   const filteredAdmins = admins.filter(
     (admin) =>
       admin.fullName &&
       admin.fullName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Safe sorting
+  // Sorting
   const handleSort = (type) => {
     const sorted = [...admins];
     if (type === "az") {
@@ -105,12 +147,18 @@ function AdminAccounts() {
             </button>
             <ul className="dropdown-menu">
               <li>
-                <button className="dropdown-item" onClick={() => handleSort("az")}>
+                <button
+                  className="dropdown-item"
+                  onClick={() => handleSort("az")}
+                >
                   Alphabetical ↑
                 </button>
               </li>
               <li>
-                <button className="dropdown-item" onClick={() => handleSort("za")}>
+                <button
+                  className="dropdown-item"
+                  onClick={() => handleSort("za")}
+                >
                   Alphabetical ↓
                 </button>
               </li>
@@ -134,22 +182,37 @@ function AdminAccounts() {
               <th>Role</th>
               <th>Email</th>
               <th>Contact Number</th>
-              <th>Verified</th> {/* New Column */}
-
+              <th>Verified</th>
+              <th style={{ width: "110px", textAlign: "center" }}>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {filteredAdmins.map((admin) => (
               <tr
                 key={admin._id}
                 style={{ cursor: "pointer" }}
-                onClick={() => navigate(`/accounts/admins/profile/${admin._id}`)}
+                onClick={() =>
+                  navigate(`/accounts/admins/profile/${admin._id}`)
+                }
               >
                 <td>{admin.fullName || "N/A"}</td>
                 <td>{admin.role || "N/A"}</td>
                 <td>{admin.email || "N/A"}</td>
                 <td>{admin.contactNumber || "N/A"}</td>
-                <td>{admin.isVerified ? "Yes" : "No"}</td> {/* Use isVerified */}
+                <td>{admin.isVerified ? "Yes" : "No"}</td>
+
+                <td style={{ textAlign: "center" }}>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevents redirect
+                      handleDelete(admin._id);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
