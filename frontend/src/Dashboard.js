@@ -129,7 +129,9 @@ useEffect(() => {
         );
 
         const paymentsWithNames = recentPayments.map((payment) => {
-          const tenant = tenants.find((t) => t._id === payment.tenantId);
+          // If tenantId is populated
+          const tenant = payment.tenantId;
+        
           return {
             ...payment,
             tenantName: tenant
@@ -137,8 +139,11 @@ useEffect(() => {
               : "Unknown Tenant",
           };
         });
-
+        
         setPayments(paymentsWithNames);
+        console.log("Tenants:", tenants);
+        console.log("Payments:", recentPayments);
+
       } catch (err) {
         console.error("Error fetching payments with tenant names:", err);
       } finally {
