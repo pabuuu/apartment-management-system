@@ -84,7 +84,7 @@ The platform implements:
 - Express
 
 ### Database & Services
-- MySQL
+- MongoDB
 - Secure authentication system
 
 ---
