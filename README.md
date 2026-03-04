@@ -1,4 +1,4 @@
-# Salmo Apartment Management System
+# R.Angeles Apartment Management System
 
 The Salmo Apartment Management System is a web-based platform designed to simplify apartment operations by centralizing tenant management, billing, and administrative tasks. The system helps administrators efficiently manage day-to-day apartment operations while ensuring a smooth experience for tenants.
 
